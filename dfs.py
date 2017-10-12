@@ -16,29 +16,108 @@ __author__ = "XunFan Zhou"
 # node will be start of new tree which is current incrementation
 
 
-
 class Stack:
-    '''The class Stack will create a stack object as a list'''
+    """The class Stack will create a stack object as a list"""
     def __init__(self):
-        '''This function is the initializer for the class Stack and defines the stack as a empty list'''
+        """This function is the initializer for the class Stack and defines the stack as a empty list"""
         self.stack = []
 
     def is_empty(self):
-        '''This function returns True if there are no elements in the stack'''
+        """This function returns True if there are no elements in the stack"""
         return len(self.stack) == 0
 
     def push(self, item):
-        '''This item appends an item to the top of the stack'''
+        """This item appends an item to the top of the stack"""
         return self.stack.append(item)
 
     def pop(self):
-        '''This function deletes the item at the top of the stack and returns that element'''
+        """This function deletes the item at the top of the stack and returns that element"""
         return self.stack.pop()
 
     def peek(self):
-        '''This function checks what the element is at the top of the stack'''
+        """This function checks what the element is at the top of the stack"""
         return self.stack[len(self.stack) - 1]
 
     def size(self):
-        '''This function will return the amount of elements in the stack'''
+        """This function will return the amount of elements in the stack"""
         return len(self.stack)
+
+
+class DFS:
+    """This class will perform DFS search on list.txt"""
+    def __init__(self):
+        """initialize all instance variables needed to perform DFS"""
+        self.file = open('list.txt', 'r')
+        self.data = self.file.read().splitlines()
+        self.digraph = self.convert_to_iterable()
+        self.colour = {}
+        for i in range(0, len(self.data) - 1):
+            self.colour.update({i: 'white'})
+        self.stack = Stack()
+        self.output = []
+        self.check_node = 0
+        self.index_count = 0
+        self.node_number = 0
+        self.line_index = 0
+        self.total_trees = 0
+        self.outfile = open("dfs.txt", 'w')
+
+    def best_node(self):
+        for colour_index in range(0, len(self.data) - 1):
+            if self.colour.get(colour_index) == 'white':
+                self.node_number = colour_index
+                return True
+        return False
+
+    def dfs_search(self):
+        """performs DFS search on given graph in the form [[1,2],[2],[1]]"""
+        while self.best_node():
+            self.index_count = 0
+            self.stack.push(self.node_number)
+            self.colour.update({self.node_number: 'grey'})
+            while not self.stack.is_empty():
+                try:
+                    self.check_node = self.digraph[self.node_number][self.index_count]
+                    if self.colour.get(self.check_node) == 'grey' or self.colour.get(self.check_node) == 'black':
+                        self.index_count += 1
+                    else:
+                        self.colour.update({self.check_node: 'grey'})
+                        self.stack.push(self.check_node)
+                        self.node_number = self.digraph[self.node_number][self.index_count]
+                        self.index_count = 0
+                except IndexError:
+                    self.index_count = 0
+                    self.colour.update({self.node_number: 'black'})
+                    self.output.append(self.stack.pop())
+                    if not self.stack.is_empty():
+                        self.node_number = self.stack.peek()
+            if self.total_trees >= 1:
+                self.outfile.write("\n")
+            for line in self.output:
+                self.outfile.write("{},{}\n".format(self.line_index, line))
+                self.line_index += 1
+                self.output = []
+            self.total_trees += 1
+
+    def convert_to_iterable(self):
+        """returns list.txt as and iterable list of lists i.e. each list within the list is a node with its arcs
+        and the outer list index is the vertex value"""
+        digraph = []
+        for line in self.data:
+            temp = ""
+            temp_arcs = []
+            for index in line:
+                if index != ",":
+                    temp += index
+                else:
+                    temp_arcs.append(int(temp))
+                    temp = ""
+            temp_arcs.append(int(temp))
+            digraph.append(temp_arcs)
+        return digraph
+
+
+a = DFS()
+a.dfs_search()
+
+
