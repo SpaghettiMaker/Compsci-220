@@ -51,7 +51,7 @@ class DFS:
         self.data = self.file.read().splitlines()
         self.digraph = self.convert_to_iterable()
         self.colour = {}
-        for i in range(0, len(self.data) - 1):
+        for i in range(0, len(self.data)):
             self.colour.update({i: 'white'})
         self.stack = Stack()
         self.output = []
@@ -63,14 +63,36 @@ class DFS:
         self.outfile = open("dfs.txt", 'w')
 
     def best_node(self):
+        """will select the best node to restart the dfs search after 1 tree is found
+        this will be the lowest number value of the vertex by specification and
+        returns True if there are still white nodes
+        """
         for colour_index in range(0, len(self.data) - 1):
             if self.colour.get(colour_index) == 'white':
                 self.node_number = colour_index
                 return True
         return False
 
-    def dfs_search(self):
-        """performs DFS search on given graph in the form [[1,2],[2],[1]]"""
+    def dfs_search_recursive(self):
+        """performs DFS search on given graph in the form [[1,2],[2],[1]] recursively"""
+        self.colour.update({self.node_number: 'grey'})
+        self.stack.push(self.node_number)
+        for i in self.digraph[self.node_number]:
+            if self.colour.get(i) == 'white':
+                self.node_number = i
+                self.dfs_search_recursive()
+        self.colour.update({self.node_number: 'black'})
+        self.output.append(self.stack.pop())
+
+        if self.stack.is_empty():
+            self.print_tree()
+            if self.best_node():
+                self.dfs_search_recursive()
+            return
+        self.node_number = self.stack.peek()
+
+    def dfs_search_iterative(self):
+        """performs DFS search on given graph in the form [[1,2],[2],[1]] iteratively"""
         while self.best_node():
             self.index_count = 0
             self.stack.push(self.node_number)
@@ -91,16 +113,20 @@ class DFS:
                     self.output.append(self.stack.pop())
                     if not self.stack.is_empty():
                         self.node_number = self.stack.peek()
-            if self.total_trees >= 1:
-                self.outfile.write("\n")
-            for line in self.output:
-                self.outfile.write("{},{}\n".format(self.line_index, line))
-                self.line_index += 1
-                self.output = []
-            self.total_trees += 1
+            self.print_tree()
+
+    def print_tree(self):
+        """Will print the tree into a txt file in the specified format"""
+        if self.total_trees >= 1:
+            self.outfile.write("\n")
+        for line in self.output:
+            self.outfile.write("{},{}\n".format(self.line_index, line))
+            self.line_index += 1
+            self.output = []
+        self.total_trees += 1
 
     def convert_to_iterable(self):
-        """returns list.txt as and iterable list of lists i.e. each list within the list is a node with its arcs
+        """gets self.data and returns an iterable list of lists i.e. each list within the list is a node with its arcs
         and the outer list index is the vertex value"""
         digraph = []
         for line in self.data:
@@ -118,6 +144,7 @@ class DFS:
 
 
 a = DFS()
-a.dfs_search()
+a.dfs_search_recursive()
+
 
 
