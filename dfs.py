@@ -46,7 +46,7 @@ class Stack:
 class DFS:
     """This class will perform DFS search on list.txt"""
     def __init__(self):
-        """initialize all instance variables needed to perform DFS"""
+        """initializes all instance variables needed to perform DFS"""
         self.file = open('list.txt', 'r')
         self.data = self.file.read().splitlines()
         self.digraph = self.convert_to_iterable()
@@ -90,30 +90,6 @@ class DFS:
                 self.dfs_search_recursive()
             return
         self.node_number = self.stack.peek()
-
-    def dfs_search_iterative(self):
-        """performs DFS search on given graph in the form [[1,2],[2],[1]] iteratively"""
-        while self.best_node():
-            self.index_count = 0
-            self.stack.push(self.node_number)
-            self.colour.update({self.node_number: 'grey'})
-            while not self.stack.is_empty():
-                try:
-                    self.check_node = self.digraph[self.node_number][self.index_count]
-                    if self.colour.get(self.check_node) == 'grey' or self.colour.get(self.check_node) == 'black':
-                        self.index_count += 1
-                    else:
-                        self.colour.update({self.check_node: 'grey'})
-                        self.stack.push(self.check_node)
-                        self.node_number = self.digraph[self.node_number][self.index_count]
-                        self.index_count = 0
-                except IndexError:
-                    self.index_count = 0
-                    self.colour.update({self.node_number: 'black'})
-                    self.output.append(self.stack.pop())
-                    if not self.stack.is_empty():
-                        self.node_number = self.stack.peek()
-            self.print_tree()
 
     def print_tree(self):
         """Will print the tree into a txt file in the specified format"""
